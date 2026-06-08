@@ -25,7 +25,7 @@ Cambia la contrasena inicial despues del primer inicio de sesion.
 - Auth.js / NextAuth `5 beta`
 - bcryptjs
 - Vercel
-- GitHub Actions para despliegue opcional
+- Vercel CLI para despliegue directo
 
 ## Estructura
 
@@ -216,6 +216,8 @@ SEED_ADMIN_USERNAME="admin" SEED_ADMIN_PASSWORD="una-contrasena-segura" npm run 
 
 ## Despliegue En Vercel
 
+El proyecto esta conectado a Vercel. Normalmente Vercel despliega automaticamente cuando se hace push a la rama principal del repositorio conectado.
+
 Configuracion recomendada:
 
 | Opcion | Valor |
@@ -257,9 +259,55 @@ npm run db:seed
 vercel deploy --prod
 ```
 
-## GitHub Actions
+## Si No Se Puede Subir A GitHub
 
-El workflow publico esta en:
+Si `git push origin main` falla con un error parecido a:
+
+```txt
+remote: Permission to Arietup/fii-espacios.git denied
+fatal: unable to access ... The requested URL returned error: 403
+```
+
+significa que la cuenta autenticada en GitHub no tiene permiso de escritura sobre ese repositorio. En ese caso no es necesario usar GitHub Actions para publicar: se puede desplegar directo a produccion con Vercel CLI desde esta carpeta.
+
+Verifica primero que el proyecto este enlazado:
+
+```bash
+cat .vercel/project.json
+```
+
+Debe existir un archivo con `projectId`, `orgId` y `projectName`.
+
+Luego ejecuta:
+
+```bash
+npm run lint
+npm run build
+vercel --prod --yes
+```
+
+Si el despliegue termina correctamente, Vercel mostrara una URL temporal y tambien el alias de produccion. Para este proyecto el alias esperado es:
+
+```txt
+https://fii-espacios.vercel.app
+```
+
+Comandos utiles para revisar el despliegue:
+
+```bash
+vercel inspect https://fii-espacios.vercel.app
+vercel logs https://fii-espacios.vercel.app --expand --since 30m
+```
+
+Para arreglar el push a GitHub despues:
+
+1. Pide acceso de escritura al repositorio `Arietup/fii-espacios`, o
+2. Inicia sesion en Git con una cuenta que tenga permisos, o
+3. Cambia `origin` a un fork propio y abre un pull request.
+
+## GitHub Actions Opcional
+
+El proyecto puede desplegarse sin GitHub Actions usando la integracion nativa de Vercel o `vercel --prod --yes`. Si se desea usar Actions en un fork, el workflow publico esta en:
 
 ```txt
 .github/workflows/vercel-deploy.yml
