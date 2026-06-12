@@ -1,12 +1,17 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import Icon from "@/components/Icon";
-import { BLOQUES, ESPACIOS } from "@/data/bloques";
 import { TIPOS_INFO, TipoEspacio } from "@/data/tipos";
 import EspacioCard from "@/components/EspacioCard";
+import type { Bloque, Espacio } from "@/data/tipos";
 
-export default function EspaciosBuscador() {
+interface Props {
+  bloques: Bloque[];
+  espacios: Espacio[];
+}
+
+export default function EspaciosBuscador({ bloques, espacios }: Props) {
   const [busqueda, setBusqueda] = useState("");
   const [bloqueId, setBloqueId] = useState("todos");
   const [tipo, setTipo] = useState<TipoEspacio | "todos">("todos");
@@ -14,7 +19,7 @@ export default function EspaciosBuscador() {
 
   const resultados = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
-    return ESPACIOS.filter((espacio) => {
+    return espacios.filter((espacio) => {
       if (bloqueId !== "todos" && espacio.bloqueId !== bloqueId) return false;
       if (tipo !== "todos" && espacio.tipo !== tipo) return false;
       if (texto) {
@@ -23,7 +28,7 @@ export default function EspaciosBuscador() {
       }
       return true;
     });
-  }, [busqueda, bloqueId, tipo]);
+  }, [busqueda, bloqueId, tipo, espacios]);
 
   function withLoading(name: string, callback: () => void | Promise<void>) {
     setActionLoading(name);
@@ -33,9 +38,7 @@ export default function EspaciosBuscador() {
   }
 
   function downloadResults() {
-    const blob = new Blob([JSON.stringify(resultados, null, 2)], {
-      type: "application/json",
-    });
+    const blob = new Blob([JSON.stringify(resultados, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -57,10 +60,10 @@ export default function EspaciosBuscador() {
   }
 
   const actions = [
-    { key: "pdf", label: "Exportar PDF", icon: "file" as const, run: () => window.print() },
-    { key: "share", label: "Compartir", icon: "share" as const, run: shareResults },
-    { key: "print", label: "Imprimir", icon: "printer" as const, run: () => window.print() },
-    { key: "download", label: "Descargar", icon: "download" as const, run: downloadResults },
+    { key: "pdf",      label: "Exportar PDF", icon: "file"     as const, run: () => window.print() },
+    { key: "share",    label: "Compartir",    icon: "share"    as const, run: shareResults },
+    { key: "print",    label: "Imprimir",     icon: "printer"  as const, run: () => window.print() },
+    { key: "download", label: "Descargar",    icon: "download" as const, run: downloadResults },
   ];
 
   return (
@@ -69,17 +72,12 @@ export default function EspaciosBuscador() {
         <div className="border-b border-[var(--divider)] px-5 py-4 sm:px-6">
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-                Resultados
-              </p>
-              <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">
-                Consulta de espacios
-              </h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Resultados</p>
+              <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">Consulta de espacios</h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 Generado el {new Date().toLocaleDateString("es-EC")} con {resultados.length} resultado{resultados.length === 1 ? "" : "s"}.
               </p>
             </div>
-
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (
                 <button
@@ -124,7 +122,7 @@ export default function EspaciosBuscador() {
               className="h-11 w-full rounded-xl border border-[var(--border-soft)] bg-white px-3 text-sm text-[var(--text)] transition hover:border-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/12"
             >
               <option value="todos">Todos los bloques</option>
-              {BLOQUES.map((b) => (
+              {bloques.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.nombre}
                 </option>

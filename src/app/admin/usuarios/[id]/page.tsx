@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AdminModal from "@/app/admin/_components/AdminModal";
 import Icon from "@/components/Icon";
 import { prisma } from "@/lib/prisma";
 import { updateUser } from "../actions";
@@ -23,24 +24,18 @@ export default async function EditarUsuarioPage({
   const updateUserWithId = updateUser.bind(null, usuario.id);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      <section className="surface-card scroll-reveal p-6 sm:p-7">
-        <Link
-          href="/admin/usuarios"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)] transition hover:text-[var(--primary-hover)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
-        >
-          <Icon name="arrowLeft" />
-          Volver a usuarios
-        </Link>
-        <p className="badge-pill mt-5 bg-[var(--primary-light)] text-[var(--primary)]">
+    <AdminModal
+      title="Editar usuario"
+      description={`Actualiza los datos de ${usuario.username}. Deja la contrasena en blanco si no quieres cambiarla.`}
+      backHref="/admin/usuarios"
+      backLabel="Usuarios"
+    >
+      <div className="mb-5">
+        <p className="badge-pill bg-[var(--primary-light)] text-[var(--primary)]">
           <Icon name="shield" className="h-3.5 w-3.5" />
           Administracion
         </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--text)]">Editar usuario</h1>
-        <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-          Actualiza los datos de <strong className="text-[var(--text)]">{usuario.username}</strong>. Deja la contrasena en blanco si no quieres cambiarla.
-        </p>
-      </section>
+      </div>
 
       <form action={updateUserWithId} className="surface-card overflow-hidden">
         <div className="flex items-center gap-3 border-b border-[var(--divider)] bg-[var(--primary-light)]/60 px-6 py-5">
@@ -108,6 +103,6 @@ export default async function EditarUsuarioPage({
           </button>
         </div>
       </form>
-    </div>
+    </AdminModal>
   );
 }

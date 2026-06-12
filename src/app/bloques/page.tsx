@@ -1,14 +1,20 @@
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import { auth } from "@/lib/auth";
-import { BLOQUES, ESPACIOS } from "@/data/bloques";
+import { fetchBloques, fetchEspacios } from "@/lib/espacios";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Bloques | Espacios FII",
 };
 
 export default async function BloquesPage() {
-  const session = await auth();
+  const [session, bloques, espacios] = await Promise.all([
+    auth(),
+    fetchBloques(),
+    fetchEspacios(),
+  ]);
   const isAdmin = session?.user.role === "ADMIN";
 
   return (
@@ -42,29 +48,27 @@ export default async function BloquesPage() {
                 <Icon name="shield" className="h-3.5 w-3.5" />
                 Acciones de administrador
               </p>
-              <h2 className="mt-2 text-lg font-semibold text-[var(--text)]">
-                Edicion de textos por bloque
-              </h2>
+              <h2 className="mt-2 text-lg font-semibold text-[var(--text)]">Gestion de bloques y espacios</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
-                La interfaz ya puede ocultar estos controles a usuarios normales. Para guardar cambios de texto permanentemente hay que mover bloques y espacios desde <code className="rounded bg-white px-1.5 py-0.5">src/data/bloques.ts</code> a tablas Prisma.
+                Los datos ahora se gestionan desde la base de datos. Accede al panel admin para crear, editar o desactivar bloques y espacios.
               </p>
             </div>
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[var(--primary)]/25 bg-white px-5 text-sm font-semibold text-[var(--primary)] opacity-70"
-              title="Requiere persistencia en base de datos"
-            >
-              <Icon name="file" />
-              Preparar edicion
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/admin/bloques"
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2B6CB0] to-[#3B82F6] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(43,108,176,0.28)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+              >
+                <Icon name="edit" />
+                Admin Bloques
+              </Link>
+            </div>
           </div>
         </section>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
-        {BLOQUES.map((bloque) => {
-          const espacios = ESPACIOS.filter((e) => e.bloqueId === bloque.id);
+        {bloques.map((bloque) => {
+          const espaciosBloque = espacios.filter((e) => e.bloqueId === bloque.id);
           return (
             <Link
               key={bloque.id}
@@ -81,7 +85,7 @@ export default async function BloquesPage() {
                   </h2>
                 </div>
                 <span className="badge-pill shrink-0 bg-[var(--secondary)] text-[var(--text-secondary)]">
-                  {espacios.length} espacios
+                  {espaciosBloque.length} espacios
                 </span>
               </div>
               <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)]">{bloque.descripcion}</p>

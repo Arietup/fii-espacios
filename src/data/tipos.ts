@@ -33,6 +33,7 @@ export interface Espacio {
 }
 
 export interface PlantaBloque {
+  id?: string;
   nombre: string;
   imagen: string;
 }

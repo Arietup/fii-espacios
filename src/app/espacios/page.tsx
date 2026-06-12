@@ -1,10 +1,15 @@
-﻿import EspaciosBuscador from "./EspaciosBuscador";
+import EspaciosBuscador from "./EspaciosBuscador";
+import { fetchBloques, fetchEspacios } from "@/lib/espacios";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Buscar espacios | Espacios FII",
 };
 
-export default function EspaciosPage() {
+export default async function EspaciosPage() {
+  const [bloques, espacios] = await Promise.all([fetchBloques(), fetchEspacios()]);
+
   return (
     <div className="flex flex-col gap-6">
       <section className="surface-card scroll-reveal p-6 sm:p-7">
@@ -16,7 +21,7 @@ export default function EspaciosPage() {
           Busca aulas, laboratorios, talleres, oficinas y demas espacios por nombre, codigo, bloque o tipo.
         </p>
       </section>
-      <EspaciosBuscador />
+      <EspaciosBuscador bloques={bloques} espacios={espacios} />
     </div>
   );
 }

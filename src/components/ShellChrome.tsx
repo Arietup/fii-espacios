@@ -11,22 +11,33 @@ type ShellUser = {
 } | null;
 
 const NAV_LINKS = [
-  { href: "/", label: "Inicio", description: "Resumen general", icon: "home" as const },
-  { href: "/bloques", label: "Bloques", description: "Distribucion fisica", icon: "building" as const },
-  { href: "/espacios", label: "Buscar espacios", description: "Consulta directa", icon: "search" as const },
-  {
-    href: "/admin/usuarios",
-    label: "Administrar usuarios",
-    description: "Cuentas y permisos",
-    icon: "users" as const,
-    adminOnly: true,
-  },
+  { href: "/",      label: "Inicio",         description: "Resumen general",      icon: "home"      as const },
+  { href: "/bloques", label: "Bloques",       description: "Distribución física",  icon: "building"  as const },
+  { href: "/espacios", label: "Buscar espacios", description: "Consulta directa", icon: "search"    as const },
+  // ─── Admin ────────────────────────────────────────────────────────────────
+  { href: "/admin",             label: "Dashboard",       description: "Panel administrativo",  icon: "dashboard"  as const, adminOnly: true },
+  { href: "/admin/usuarios",    label: "Usuarios",        description: "Cuentas y permisos",    icon: "users"      as const, adminOnly: true },
+  { href: "/admin/bloques",     label: "Bloques",         description: "CRUD de bloques",       icon: "building"   as const, adminOnly: true },
+  { href: "/admin/plantas",     label: "Plantas",         description: "CRUD de plantas",       icon: "layers"     as const, adminOnly: true },
+  { href: "/admin/espacios",    label: "Espacios",        description: "CRUD de espacios",      icon: "archive"    as const, adminOnly: true },
+  { href: "/admin/tipos",       label: "Tipos",           description: "Tipos de espacio",      icon: "tag"        as const, adminOnly: true },
+  { href: "/admin/usos",        label: "Usos",            description: "Usos de espacio",       icon: "bookmark"   as const, adminOnly: true },
+  { href: "/admin/equipamientos", label: "Equipamientos", description: "Catálogo de equipos",  icon: "package"    as const, adminOnly: true },
+  { href: "/admin/estados",     label: "Estados",         description: "Estados físicos",       icon: "zap"        as const, adminOnly: true },
 ];
 
 function getContextLabel(pathname: string) {
-  if (pathname.startsWith("/admin")) return "Administracion";
-  if (pathname.startsWith("/espacios")) return "Busqueda de espacios";
-  if (pathname.startsWith("/bloques")) return "Gestion de bloques";
+  if (pathname.startsWith("/admin/bloques"))      return "Admin — Bloques";
+  if (pathname.startsWith("/admin/plantas"))       return "Admin — Plantas";
+  if (pathname.startsWith("/admin/espacios"))      return "Admin — Espacios";
+  if (pathname.startsWith("/admin/tipos"))         return "Admin — Tipos";
+  if (pathname.startsWith("/admin/usos"))          return "Admin — Usos";
+  if (pathname.startsWith("/admin/equipamientos")) return "Admin — Equipamientos";
+  if (pathname.startsWith("/admin/estados"))       return "Admin — Estados";
+  if (pathname.startsWith("/admin/usuarios"))      return "Admin — Usuarios";
+  if (pathname.startsWith("/admin"))               return "Administración";
+  if (pathname.startsWith("/espacios"))            return "Búsqueda de espacios";
+  if (pathname.startsWith("/bloques"))             return "Gestión de bloques";
   return "Panel principal";
 }
 

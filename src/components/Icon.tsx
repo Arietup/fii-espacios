@@ -3,28 +3,39 @@ type IconName =
   | "arrowLeft"
   | "arrowRight"
   | "bell"
+  | "bookmark"
+  | "box"
   | "building"
   | "checkCircle"
   | "chevronRight"
   | "close"
+  | "dashboard"
   | "download"
   | "edit"
   | "eye"
   | "eyeOff"
   | "file"
+  | "filter"
   | "home"
+  | "layers"
   | "lock"
   | "logOut"
   | "mail"
   | "menu"
+  | "package"
+  | "plus"
   | "printer"
   | "search"
   | "share"
   | "shield"
   | "sparkles"
+  | "tag"
+  | "toggleOff"
+  | "toggleOn"
   | "trash"
   | "user"
-  | "users";
+  | "users"
+  | "zap";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   archive: (
@@ -43,6 +54,17 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M10 20a2 2 0 0 0 4 0" />
     </>
   ),
+  bookmark: (
+    <>
+      <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" />
+    </>
+  ),
+  box: (
+    <>
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+      <path d="m3.3 7 8.7 5 8.7-5M12 22V12" />
+    </>
+  ),
   building: (
     <>
       <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
@@ -58,6 +80,14 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   chevronRight: <path d="m9 18 6-6-6-6" />,
   close: <path d="M18 6 6 18M6 6l12 12" />,
+  dashboard: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </>
+  ),
   download: (
     <>
       <path d="M12 3v12" />
@@ -90,11 +120,23 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M14 2v6h6M8 13h8M8 17h5" />
     </>
   ),
+  filter: (
+    <>
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </>
+  ),
   home: (
     <>
       <path d="m3 11 9-8 9 8" />
       <path d="M5 10v11h14V10" />
       <path d="M9 21v-6h6v6" />
+    </>
+  ),
+  layers: (
+    <>
+      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
     </>
   ),
   lock: (
@@ -117,6 +159,14 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+  package: (
+    <>
+      <path d="m7.5 4.27 9 5.15" />
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+      <path d="m3.3 7 8.7 5 8.7-5M12 22V12" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
   printer: (
     <>
       <path d="M6 9V3h12v6" />
@@ -143,6 +193,24 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="12" cy="12" r="2.4" />
     </>
   ),
+  tag: (
+    <>
+      <path d="M12 2H2v10l9.29 9.29a2 2 0 0 0 2.83 0l6.88-6.88a2 2 0 0 0 0-2.83L12 2Z" />
+      <circle cx="7" cy="7" r="1" fill="currentColor" />
+    </>
+  ),
+  toggleOff: (
+    <>
+      <rect x="1" y="6" width="22" height="12" rx="6" />
+      <circle cx="7" cy="12" r="4" fill="currentColor" />
+    </>
+  ),
+  toggleOn: (
+    <>
+      <rect x="1" y="6" width="22" height="12" rx="6" />
+      <circle cx="17" cy="12" r="4" fill="currentColor" />
+    </>
+  ),
   trash: (
     <>
       <path d="M3 6h18" />
@@ -161,6 +229,11 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M16 21a6 6 0 0 0-12 0" />
       <circle cx="10" cy="7" r="4" />
       <path d="M22 21a5 5 0 0 0-5-5M17 3a4 4 0 0 1 0 8" />
+    </>
+  ),
+  zap: (
+    <>
+      <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />
     </>
   ),
 };
