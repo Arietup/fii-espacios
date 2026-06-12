@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useMemo } from "react";
 import Icon from "@/components/Icon";
+import AdminFormModal from "@/app/admin/_components/AdminFormModal";
 import { createEspacio, updateEspacio, toggleEspacio, deleteEspacio } from "./actions";
 import { TIPOS_INFO } from "@/data/tipos";
 import type { TipoEspacio } from "@/data/tipos";
@@ -111,7 +113,7 @@ export default function EspaciosCrudClient({
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Bloque de acciones</p>
-              <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">Gestion del CRUD</h2>
+              <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">Gestión del CRUD</h2>
             </div>
             <button type="button" onClick={openCreate}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2B6CB0] to-[#3B82F6] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(43,108,176,0.28)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
@@ -123,7 +125,7 @@ export default function EspaciosCrudClient({
 
         <div className="grid gap-3 bg-[var(--secondary)]/50 p-5 sm:grid-cols-3 sm:p-6">
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-[var(--text)]">Busqueda</span>
+            <span className="text-sm font-semibold text-[var(--text)]">Búsqueda</span>
             <div className="flex h-11 items-center gap-3 rounded-xl border border-[var(--border-soft)] bg-white px-3 transition focus-within:border-[var(--primary)] focus-within:ring-4 focus-within:ring-[var(--primary)]/12">
               <Icon name="search" className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
               <input type="search" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
@@ -160,7 +162,7 @@ export default function EspaciosCrudClient({
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-[var(--secondary)] text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
               <tr>
-                <th className="px-4 py-3 font-semibold">Codigo</th>
+                <th className="px-4 py-3 font-semibold">Código</th>
                 <th className="px-4 py-3 font-semibold">Nombre</th>
                 <th className="px-4 py-3 font-semibold">Tipo</th>
                 <th className="px-4 py-3 font-semibold">Bloque</th>
@@ -228,111 +230,106 @@ export default function EspaciosCrudClient({
       </section>
 
       {/* ── Modal crear / editar espacio ─────────────────────────────────── */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--text)]/45 px-4 py-6 backdrop-blur-sm">
-          <section
-            role="dialog" aria-modal="true"
-            className="w-full max-w-2xl overflow-hidden rounded-[20px] border border-[var(--border-soft)] bg-white shadow-[0_28px_90px_rgba(15,23,42,0.24)]"
-            style={{ maxHeight: "90vh", overflowY: "auto" }}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-[var(--divider)] bg-[var(--primary-light)]/60 px-6 py-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0] to-[#3B82F6] text-white shadow-[0_10px_24px_rgba(43,108,176,0.3)]">
-                  <Icon name={selected ? "edit" : "plus"} className="h-5 w-5" />
+      <AdminFormModal
+        open={modalOpen}
+        onClose={closeModal}
+        title={selected ? `Editar: ${selected.nombre}` : "Crear espacio"}
+        subtitle={selected ? "Editar registro" : "Nuevo registro"}
+        iconName={selected ? "edit" : "plus"}
+        size="md"
+        pending={pending}
+        formAction={handleSubmit}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          {/* Código */}
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-[var(--text)]">Código <span className="text-[var(--danger)]">*</span></span>
+            <input name="codigo" required defaultValue={selected?.codigo ?? ""} placeholder="A-PB-01" className={fieldClass} />
+          </label>
+          {/* Nombre */}
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-[var(--text)]">Nombre <span className="text-[var(--danger)]">*</span></span>
+            <input name="nombre" required defaultValue={selected?.nombre ?? ""} placeholder="Decanato" className={fieldClass} />
+          </label>
+          {/* Slug (solo crear) */}
+          {!selected && (
+            <label className="space-y-1.5 sm:col-span-2">
+              <span className="text-sm font-semibold text-[var(--text)]">Slug / ID (URL) — opcional</span>
+              <input name="slug" placeholder="a-pb-decanato (se genera automáticamente)" className={fieldClass} />
+            </label>
+          )}
+          {/* Tipo */}
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-[var(--text)]">Tipo <span className="text-[var(--danger)]">*</span></span>
+            <select name="tipoId" required defaultValue={selected?.tipoId ?? ""} className={fieldClass}>
+              <option value="">— Selecciona —</option>
+              {tipos.map((t) => <option key={t.id} value={t.id}>{t.etiqueta}</option>)}
+            </select>
+          </label>
+          {/* Capacidad */}
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-[var(--text)]">Capacidad (personas)</span>
+            <input type="number" name="capacidad" min={1} defaultValue={selected?.capacidad ?? ""} placeholder="40" className={fieldClass} />
+          </label>
+          {/* Bloque */}
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-[var(--text)]">Bloque <span className="text-[var(--danger)]">*</span></span>
+            <select name="bloqueId" required value={formBloqueId}
+              onChange={(ev) => {
+                setFormBloqueId(ev.target.value);
+                const firstPlanta = bloques.find((b) => b.id === ev.target.value)?.plantas[0];
+                setFormPlantaId(firstPlanta?.id ?? "");
+              }} className={fieldClass}>
+              <option value="">— Selecciona —</option>
+              {bloques.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+            </select>
+          </label>
+          {/* Planta (cascada) */}
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-[var(--text)]">Planta <span className="text-[var(--danger)]">*</span></span>
+            <select name="plantaId" required value={formPlantaId}
+              onChange={(ev) => setFormPlantaId(ev.target.value)} className={fieldClass}>
+              <option value="">— Selecciona bloque primero —</option>
+              {plantasDisponibles.map((p) => (
+                <option key={p.id} value={p.id}>{p.nombre}</option>
+              ))}
+            </select>
+          </label>
+          {/* Descripción */}
+          <label className="space-y-1.5 sm:col-span-2">
+            <span className="text-sm font-semibold text-[var(--text)]">Descripción <span className="text-[var(--danger)]">*</span></span>
+            <textarea name="descripcion" required rows={3} defaultValue={selected?.descripcion ?? ""} placeholder="Descripción del espacio..." className={areaClass} />
+          </label>
+
+          {/* Sección de imágenes */}
+          <div className="sm:col-span-2 border-t border-[var(--divider)] pt-4">
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-[var(--secondary)] p-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)]">
+                  <Icon name="file" className="h-4 w-4 text-[var(--primary)]" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-                    {selected ? "Editar registro" : "Nuevo registro"}
-                  </p>
-                  <h3 className="mt-0.5 text-xl font-semibold text-[var(--text)]">
-                    {selected ? `Editar: ${selected.nombre}` : "Crear espacio"}
-                  </h3>
+                  <p className="text-sm font-semibold text-[var(--text)]">Imágenes del registro</p>
+                  {selected ? (
+                    <p className="text-xs text-[var(--text-muted)]">Fotos y referencias del espacio.</p>
+                  ) : (
+                    <p className="text-xs text-amber-600">Guarda primero el registro para poder agregar imágenes.</p>
+                  )}
                 </div>
               </div>
-              <button type="button" onClick={closeModal}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-soft)] bg-white text-[var(--text-secondary)] transition hover:bg-[var(--secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                <Icon name="close" className="h-4 w-4" />
-              </button>
+              {selected && (
+                <Link
+                  href={`/admin/espacios/${selected.id}/imagenes`}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--primary)]/30 bg-white px-3 text-xs font-semibold text-[var(--primary)] transition hover:bg-[var(--primary-light)]"
+                >
+                  <Icon name="file" className="h-3.5 w-3.5" />
+                  Administrar
+                </Link>
+              )}
             </div>
-
-            <form action={handleSubmit}>
-              <div className="grid gap-4 p-6 sm:grid-cols-2">
-                {/* Código */}
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Código</span>
-                  <input name="codigo" required defaultValue={selected?.codigo ?? ""} placeholder="A-PB-01" className={fieldClass} />
-                </label>
-                {/* Nombre */}
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Nombre</span>
-                  <input name="nombre" required defaultValue={selected?.nombre ?? ""} placeholder="Decanato" className={fieldClass} />
-                </label>
-                {/* Slug (solo crear) */}
-                {!selected && (
-                  <label className="space-y-2 sm:col-span-2">
-                    <span className="text-sm font-semibold text-[var(--text)]">Slug / ID (URL) — opcional</span>
-                    <input name="slug" placeholder="a-pb-decanato (se genera automáticamente)" className={fieldClass} />
-                  </label>
-                )}
-                {/* Tipo */}
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Tipo</span>
-                  <select name="tipoId" required defaultValue={selected?.tipoId ?? ""} className={fieldClass}>
-                    <option value="">— Selecciona —</option>
-                    {tipos.map((t) => <option key={t.id} value={t.id}>{t.etiqueta}</option>)}
-                  </select>
-                </label>
-                {/* Capacidad */}
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Capacidad (personas)</span>
-                  <input type="number" name="capacidad" min={1} defaultValue={selected?.capacidad ?? ""} placeholder="40" className={fieldClass} />
-                </label>
-                {/* Bloque */}
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Bloque</span>
-                  <select name="bloqueId" required value={formBloqueId}
-                    onChange={(ev) => {
-                      setFormBloqueId(ev.target.value);
-                      const firstPlanta = bloques.find((b) => b.id === ev.target.value)?.plantas[0];
-                      setFormPlantaId(firstPlanta?.id ?? "");
-                    }} className={fieldClass}>
-                    <option value="">— Selecciona —</option>
-                    {bloques.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-                  </select>
-                </label>
-                {/* Planta (cascada controlada) */}
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Planta</span>
-                  <select name="plantaId" required value={formPlantaId}
-                    onChange={(ev) => setFormPlantaId(ev.target.value)} className={fieldClass}>
-                    <option value="">— Selecciona bloque primero —</option>
-                    {plantasDisponibles.map((p) => (
-                      <option key={p.id} value={p.id}>{p.nombre}</option>
-                    ))}
-                  </select>
-                </label>
-                {/* Descripción */}
-                <label className="space-y-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Descripción</span>
-                  <textarea name="descripcion" required rows={3} defaultValue={selected?.descripcion ?? ""} placeholder="Descripción del espacio..." className={areaClass} />
-                </label>
-              </div>
-
-              <div className="flex flex-col gap-3 border-t border-[var(--divider)] bg-[var(--secondary)] px-6 py-4 sm:flex-row sm:justify-end">
-                <button type="button" onClick={closeModal}
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border-soft)] bg-white px-5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                  Cancelar
-                </button>
-                <button type="submit" disabled={pending}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2B6CB0] to-[#3B82F6] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(43,108,176,0.28)] transition hover:-translate-y-0.5 disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                  <Icon name="checkCircle" className="h-4 w-4" />
-                  {pending ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
-            </form>
-          </section>
+          </div>
         </div>
-      )}
+      </AdminFormModal>
     </>
   );
 }

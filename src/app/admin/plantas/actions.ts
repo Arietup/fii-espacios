@@ -18,25 +18,43 @@ function intValue(formData: FormData, key: string, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function clampedInt(formData: FormData, key: string, min = 0, max = 9999) {
+  return Math.max(min, Math.min(max, intValue(formData, key)));
+}
+
+function validateLen(value: string, field: string, maxLen: number) {
+  if (value && value.length > maxLen) throw new Error(`El campo "${field}" no puede superar ${maxLen} caracteres.`);
+  return value;
+}
+
+function validatePlantaFields(formData: FormData) {
+  const bloqueId    = text(formData, "bloqueId");
+  const nombre      = validateLen(text(formData, "nombre"),      "Nombre",        200);
+  const imagenUrl   = validateLen(text(formData, "imagenUrl"),   "Imagen/Plano",  500);
+  const codigo      = validateLen(text(formData, "codigo"),      "Código",         50);
+  const descripcion = validateLen(text(formData, "descripcion"), "Descripción",  1000);
+  const observaciones = validateLen(text(formData, "observaciones"), "Observaciones", 1000);
+
+  if (!bloqueId)  throw new Error("El bloque es obligatorio.");
+  if (!nombre)    throw new Error("El nombre es obligatorio.");
+  if (!imagenUrl) throw new Error("La imagen/plano es obligatoria.");
+
+  return {
+    bloqueId,
+    nombre,
+    imagenUrl,
+    codigo:       codigo || null,
+    descripcion:  descripcion || null,
+    observaciones: observaciones || null,
+    nivel:  clampedInt(formData, "nivel"),
+    orden:  clampedInt(formData, "orden"),
+  };
+}
+
 export async function createPlanta(formData: FormData) {
   await requireAdminAction();
-  const bloqueId = text(formData, "bloqueId");
-  const nombre = text(formData, "nombre");
-  const imagenUrl = text(formData, "imagenUrl");
-  if (!bloqueId || !nombre || !imagenUrl) throw new Error("Bloque, nombre e imagen/plano son obligatorios.");
-
-  await prisma.planta.create({
-    data: {
-      bloqueId,
-      nombre,
-      codigo: nullableText(formData, "codigo"),
-      nivel: intValue(formData, "nivel"),
-      descripcion: nullableText(formData, "descripcion"),
-      imagenUrl,
-      observaciones: nullableText(formData, "observaciones"),
-      orden: intValue(formData, "orden"),
-    },
-  });
+  const fields = validatePlantaFields(formData);
+  await prisma.planta.create({ data: fields });
   revalidatePath("/admin/plantas");
   revalidatePath("/bloques");
   redirect("/admin/plantas");
@@ -44,27 +62,13 @@ export async function createPlanta(formData: FormData) {
 
 export async function updatePlanta(id: string, formData: FormData) {
   await requireAdminAction();
-  const bloqueId = text(formData, "bloqueId");
-  const nombre = text(formData, "nombre");
-  const imagenUrl = text(formData, "imagenUrl");
-  if (!bloqueId || !nombre || !imagenUrl) throw new Error("Bloque, nombre e imagen/plano son obligatorios.");
+  if (!id) throw new Error("ID de planta inválido.");
+  const fields = validatePlantaFields(formData);
+  const activo = text(formData, "activo") === "true";
 
   await prisma.$transaction(async (tx) => {
-    await tx.planta.update({
-      where: { id },
-      data: {
-        bloqueId,
-        nombre,
-        codigo: nullableText(formData, "codigo"),
-        nivel: intValue(formData, "nivel"),
-        descripcion: nullableText(formData, "descripcion"),
-        imagenUrl,
-        observaciones: nullableText(formData, "observaciones"),
-        activo: text(formData, "activo") === "true",
-        orden: intValue(formData, "orden"),
-      },
-    });
-    await tx.espacio.updateMany({ where: { plantaId: id }, data: { bloqueId } });
+    await tx.planta.update({ where: { id }, data: { ...fields, activo } });
+    await tx.espacio.updateMany({ where: { plantaId: id }, data: { bloqueId: fields.bloqueId } });
   });
 
   revalidatePath("/admin/plantas");
@@ -91,4 +95,33 @@ export async function deletePlanta(id: string) {
   }
   revalidatePath("/admin/plantas");
   revalidatePath("/bloques");
+}
+
+// ─── Acciones inline (sin redirect, para modales cliente) ────────────────────
+
+export async function createPlantaInline(formData: FormData) {
+  await requireAdminAction();
+  const fields = validatePlantaFields(formData);
+  await prisma.planta.create({ data: fields });
+  revalidatePath("/admin/plantas");
+  revalidatePath("/admin/bloques");
+  revalidatePath("/bloques");
+}
+
+export async function updatePlantaInline(id: string, formData: FormData) {
+  await requireAdminAction();
+  if (!id) throw new Error("ID de planta inválido.");
+  const fields = validatePlantaFields(formData);
+  const activo = text(formData, "activo") === "true";
+
+  await prisma.$transaction(async (tx) => {
+    await tx.planta.update({ where: { id }, data: { ...fields, activo } });
+    await tx.espacio.updateMany({ where: { plantaId: id }, data: { bloqueId: fields.bloqueId } });
+  });
+
+  revalidatePath("/admin/plantas");
+  revalidatePath("/admin/bloques");
+  revalidatePath("/admin/espacios");
+  revalidatePath("/bloques");
+  revalidatePath("/espacios");
 }

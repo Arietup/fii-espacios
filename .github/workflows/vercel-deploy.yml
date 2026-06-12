@@ -1,14 +1,17 @@
 name: Deploy to Vercel
 
+# ─── Disparadores ──────────────────────────────────────────────────────────────
 on:
-  workflow_dispatch:
+  workflow_dispatch:   # permite ejecutar manualmente desde GitHub UI
   push:
     branches:
       - main
 
+# ─── Permisos mínimos necesarios ───────────────────────────────────────────────
 permissions:
   contents: read
 
+# ─── Evitar despliegues paralelos al mismo entorno ─────────────────────────────
 concurrency:
   group: production-${{ github.ref }}
   cancel-in-progress: true
@@ -18,52 +21,87 @@ jobs:
     name: Validate, migrate, and deploy production
     runs-on: ubuntu-latest
 
+    # ── Variables de entorno para todos los pasos ──────────────────────────────
+    # IMPORTANTE: Estos valores provienen de los Secrets configurados en:
+    #   GitHub → Settings → Secrets and variables → Actions
+    #
+    # Secretos requeridos (ver DEPLOY.md para instrucciones):
+    #   AUTH_SECRET        — Valor generado con: openssl rand -base64 32
+    #   DATABASE_URL       — URL de conexión Prisma Postgres (pooled)
+    #   VERCEL_TOKEN       — Token de API de Vercel
+    #   VERCEL_ORG_ID      — ID de organización/team en Vercel
+    #   VERCEL_PROJECT_ID  — ID del proyecto en Vercel
     env:
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      AUTH_SECRET:       ${{ secrets.AUTH_SECRET }}
+      DATABASE_URL:      ${{ secrets.DATABASE_URL }}
+      VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
 
     steps:
+      # ── 1. Checkout del código ──────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ── 2. Configurar Node.js ───────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20   # LTS estable compatible con Next.js 16 y Prisma 7
           cache: npm
 
+      # ── 3. Validar secrets requeridos ──────────────────────────────────────
+      # Si algún secret falta, el job falla aquí con mensaje claro.
+      # Solución: configurar los secrets en GitHub → Settings → Secrets.
       - name: Validate required secrets
         shell: bash
         run: |
-          test -n "$AUTH_SECRET" || (echo "Missing AUTH_SECRET" && exit 1)
-          test -n "$DATABASE_URL" || (echo "Missing DATABASE_URL" && exit 1)
-          test -n "$VERCEL_ORG_ID" || (echo "Missing VERCEL_ORG_ID" && exit 1)
-          test -n "$VERCEL_PROJECT_ID" || (echo "Missing VERCEL_PROJECT_ID" && exit 1)
-          test -n "$VERCEL_TOKEN" || (echo "Missing VERCEL_TOKEN" && exit 1)
+          missing=()
+          [ -z "$AUTH_SECRET"       ] && missing+=("AUTH_SECRET")
+          [ -z "$DATABASE_URL"      ] && missing+=("DATABASE_URL")
+          [ -z "$VERCEL_ORG_ID"     ] && missing+=("VERCEL_ORG_ID")
+          [ -z "$VERCEL_PROJECT_ID" ] && missing+=("VERCEL_PROJECT_ID")
+          [ -z "$VERCEL_TOKEN"      ] && missing+=("VERCEL_TOKEN")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "❌ Secrets faltantes: ${missing[*]}"
+            echo ""
+            echo "Configura los secrets en:"
+            echo "  GitHub → Settings → Secrets and variables → Actions → New repository secret"
+            echo ""
+            echo "Consulta DEPLOY.md para instrucciones detalladas."
+            exit 1
+          fi
+          echo "✅ Todos los secrets requeridos están presentes."
 
+      # ── 4. Instalar dependencias ────────────────────────────────────────────
       - name: Install dependencies
         run: npm ci
 
+      # ── 5. Generar Prisma Client ────────────────────────────────────────────
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      # ── 6. Lint ─────────────────────────────────────────────────────────────
       - name: Run lint
         run: npm run lint
 
-      - name: Run production build validation
+      # ── 7. Build de producción (valida TypeScript + Next.js) ───────────────
+      - name: Build production
         run: npm run build
 
+      # ── 8. Aplicar migraciones de base de datos ─────────────────────────────
+      # prisma migrate deploy aplica migraciones pendientes sin resetear datos.
       - name: Apply database migrations
         run: npx prisma migrate deploy
 
+      # ── 9. Pull de configuración de Vercel ─────────────────────────────────
       - name: Pull Vercel environment
         run: npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
+      # ── 10. Build con Vercel ────────────────────────────────────────────────
       - name: Build with Vercel
         run: npx vercel build --prod --token="$VERCEL_TOKEN"
 
-      - name: Deploy prebuilt output
+      # ── 11. Deploy prebuilt a producción ───────────────────────────────────
+      - name: Deploy to production
         run: npx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

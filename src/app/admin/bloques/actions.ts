@@ -12,19 +12,28 @@ function slug(text: string) {
     .replace(/[^a-z0-9-]/g, "");
 }
 
+/* Validación de campos de texto con longitud máxima */
+function validateText(
+  value: string,
+  field: string,
+  required: boolean,
+  maxLen: number,
+): string {
+  const v = value.trim();
+  if (required && !v) throw new Error(`El campo "${field}" es obligatorio.`);
+  if (v.length > maxLen) throw new Error(`El campo "${field}" no puede superar ${maxLen} caracteres.`);
+  return v;
+}
+
 // ─── Bloques ─────────────────────────────────────────────────────────────────
 
 export async function createBloque(formData: FormData) {
   await requireAdminAction();
-  const nombre      = String(formData.get("nombre") ?? "").trim();
-  const resumen     = String(formData.get("resumen") ?? "").trim();
-  const descripcion = String(formData.get("descripcion") ?? "").trim();
-  const orden       = parseInt(String(formData.get("orden") ?? "0"), 10);
-  const customSlug  = String(formData.get("slug") ?? "").trim() || slug(nombre);
-
-  if (!nombre || !resumen || !descripcion) {
-    throw new Error("Nombre, resumen y descripcion son obligatorios.");
-  }
+  const nombre      = validateText(String(formData.get("nombre") ?? ""),      "Nombre",      true,  200);
+  const resumen     = validateText(String(formData.get("resumen") ?? ""),     "Resumen",     true,  500);
+  const descripcion = validateText(String(formData.get("descripcion") ?? ""), "Descripción", true, 2000);
+  const customSlug  = validateText(String(formData.get("slug") ?? "") || slug(nombre), "Slug", false, 100);
+  const orden       = Math.max(0, Math.min(9999, parseInt(String(formData.get("orden") ?? "0"), 10) || 0));
 
   await prisma.bloque.create({
     data: { slug: customSlug, nombre, resumen, descripcion, orden },
@@ -37,14 +46,12 @@ export async function createBloque(formData: FormData) {
 
 export async function updateBloque(id: string, formData: FormData) {
   await requireAdminAction();
-  const nombre      = String(formData.get("nombre") ?? "").trim();
-  const resumen     = String(formData.get("resumen") ?? "").trim();
-  const descripcion = String(formData.get("descripcion") ?? "").trim();
-  const orden       = parseInt(String(formData.get("orden") ?? "0"), 10);
+  if (!id || typeof id !== "string") throw new Error("ID de bloque inválido.");
 
-  if (!nombre || !resumen || !descripcion) {
-    throw new Error("Nombre, resumen y descripcion son obligatorios.");
-  }
+  const nombre      = validateText(String(formData.get("nombre") ?? ""),      "Nombre",      true,  200);
+  const resumen     = validateText(String(formData.get("resumen") ?? ""),     "Resumen",     true,  500);
+  const descripcion = validateText(String(formData.get("descripcion") ?? ""), "Descripción", true, 2000);
+  const orden       = Math.max(0, Math.min(9999, parseInt(String(formData.get("orden") ?? "0"), 10) || 0));
 
   await prisma.bloque.update({
     where: { id },

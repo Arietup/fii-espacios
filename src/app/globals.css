@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   VARIABLES DE DISEÑO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
   --background: #f4f8fc;
   --foreground: #1e293b;
@@ -19,32 +23,71 @@
   --border-soft: #e2e8f0;
   --divider: #edf2f7;
 
-  /* Text */
-  --text: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  /* Text — relación de contraste WCAG AA mínimo 4.5:1 sobre fondo blanco */
+  --text: #1e293b;          /* 13.9:1 */
+  --text-secondary: #475569; /* 7.0:1 — mejorado desde #64748b */
+  --text-muted: #64748b;    /* 4.6:1 — mínimo AA */
 
   /* Accents */
-  --success: #22c55e;
+  --success: #16a34a;       /* verde más oscuro para mejor contraste */
   --success-light: #dcfce7;
-  --warning: #f59e0b;
+  --warning: #d97706;       /* ámbar más oscuro */
   --warning-light: #fef3c7;
-  --danger: #ef4444;
+  --danger: #dc2626;        /* rojo más oscuro */
   --danger-light: #fee2e2;
-  --info: #0ea5e9;
+  --info: #0369a1;          /* azul más oscuro */
   --info-light: #e0f2fe;
 
-  /* Space-type accents */
-  --type-aula: #8b5cf6;
-  --type-laboratorio: #10b981;
-  --type-oficina: #3b82f6;
-  --type-auditorio: #f97316;
-  --type-bodega: #64748b;
-  --type-sala: #ec4899;
-  --type-taller: #f59e0b;
+  /* Muted */
+  --muted: #64748b;
 
-  --shadow-soft: 0 1px 2px rgba(30, 41, 59, 0.04), 0 8px 24px rgba(30, 41, 59, 0.06);
-  --shadow-lift: 0 16px 40px rgba(43, 108, 176, 0.14);
+  /* Space-type accents */
+  --type-aula: #7c3aed;
+  --type-laboratorio: #059669;
+  --type-oficina: #2563eb;
+  --type-auditorio: #ea580c;
+  --type-bodega: #475569;
+  --type-sala: #db2777;
+  --type-taller: #d97706;
+
+  --shadow-soft: 0 1px 3px rgba(30, 41, 59, 0.06), 0 8px 28px rgba(30, 41, 59, 0.08);
+  --shadow-lift: 0 20px 48px rgba(43, 108, 176, 0.16);
+  --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+
+  /* Focus ring — visible para teclado */
+  --focus-ring: 0 0 0 3px rgba(43, 108, 176, 0.45);
+  --focus-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.45);
+
+  /* Bootstrap 5 compat grid variables */
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), "Segoe UI", Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 @theme inline {
@@ -54,13 +97,121 @@
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESIBILIDAD — WCAG 2.1 AA
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Skip-to-content link (visible al recibir foco con teclado) */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.6rem 1.25rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 0 0 0.75rem 0.75rem;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(43,108,176,0.35);
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
 }
 
-/* Surfaces & cards ----------------------------------------------------- */
+/* 2. Screen-reader only (Bootstrap 5 & WCAG) */
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Versión que reaparece al recibir foco */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* 3. Focus visible — solo para navegación de teclado (WCAG 2.4.11) */
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Eliminar outline del mouse (no-keyboard) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 4. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 5. Alto contraste (Windows High Contrast / prefers-contrast) */
+@media (prefers-contrast: high) {
+  :root {
+    --border-soft: #000;
+    --divider: #333;
+    --text-muted: #1e293b;
+    --text-secondary: #1e293b;
+    --primary-light: #fff3cd;
+    --secondary: #f0f0f0;
+  }
+
+  .surface-card,
+  .kpi-card {
+    border: 2px solid #000 !important;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* 6. Live region para lectores de pantalla */
+.sr-live-polite {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SURFACES & CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .surface-card {
   background: var(--surface);
@@ -72,7 +223,6 @@ body {
 .surface-card-hover {
   transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease, border-color 220ms ease;
 }
-
 .surface-card-hover:hover {
   transform: translateY(-3px);
   border-color: var(--primary);
@@ -80,14 +230,18 @@ body {
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255,255,255,0.72);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255,255,255,0.6);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRAND GRADIENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .brand-gradient {
-  background: linear-gradient(135deg, #2b6cb0 0%, #3b82f6 55%, #60a5fa 100%);
+  background: linear-gradient(135deg, #1e4e8c 0%, #2b6cb0 45%, #3b82f6 100%);
 }
 
 .brand-gradient-soft {
@@ -95,15 +249,19 @@ body {
 }
 
 .login-gradient {
-  background: linear-gradient(160deg, #0a4a82 0%, #0f5586 48%, #1b6294 100%);
+  background: linear-gradient(160deg, #0a2f52 0%, #0f4a82 48%, #1b6294 100%);
 }
 
 .login-pattern {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 56px 56px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGES & PILLS
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .badge-pill {
   display: inline-flex;
@@ -114,7 +272,12 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+  line-height: 1;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KPI CARDS — más llamativas con gradiente y brillo
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .kpi-card {
   position: relative;
@@ -122,22 +285,25 @@ body {
   border-radius: 1.1rem;
   border: 1px solid var(--border-soft);
   background: var(--surface);
-  box-shadow: var(--shadow-soft);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  box-shadow: var(--shadow-card);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
-
 .kpi-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: var(--primary-soft);
   box-shadow: var(--shadow-lift);
 }
-
 .kpi-card::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.5), transparent 45%);
+  background: linear-gradient(140deg, rgba(255,255,255,0.55) 0%, transparent 50%);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKELETON LOADING
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .skeleton {
   position: relative;
@@ -145,40 +311,80 @@ body {
   background: var(--divider);
   border-radius: 0.6rem;
 }
-
 .skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
   animation: skeleton-sweep 1.6s infinite;
 }
-
 @keyframes skeleton-sweep {
-  100% {
-    transform: translateX(100%);
-  }
+  100% { transform: translateX(100%); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOVER SCALE
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .hover-scale {
   transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-
 .hover-scale:hover {
   transform: scale(1.015);
 }
 
-button,
-a,
-input,
-select {
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTONES ACCESIBLES — btn-primary Bootstrap-compatible
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1.25rem;
+  background: linear-gradient(135deg, #2b6cb0, #3b82f6);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(43,108,176,0.25);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(43,108,176,0.32);
+  background: linear-gradient(135deg, #245c99, #2b6cb0);
+  color: #fff;
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(43,108,176,0.2);
+}
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-primary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRAND LOGO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+button, a, input, select, textarea {
   outline-color: var(--brand);
 }
 
-a {
-  text-decoration: none;
-}
+a { text-decoration: none; }
 
 .brand-logo-badge {
   position: relative;
@@ -188,16 +394,14 @@ a {
   justify-content: center;
   overflow: hidden;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  background:
-    radial-gradient(circle at 30% 20%, #ffffff 0 24%, #edf6ff 58%, #dceeff 100%);
+  border: 1px solid rgba(255,255,255,0.85);
+  background: radial-gradient(circle at 30% 20%, #ffffff 0 24%, #edf6ff 58%, #dceeff 100%);
   box-shadow:
-    0 14px 32px rgba(43, 108, 176, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -10px 22px rgba(43, 108, 176, 0.08);
+    0 14px 32px rgba(43,108,176,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -10px 22px rgba(43,108,176,0.08);
   isolation: isolate;
 }
-
 .brand-logo-img {
   position: relative;
   z-index: 1;
@@ -206,24 +410,26 @@ a {
   height: 82%;
   object-fit: contain;
 }
-
 .brand-logo-badge::before {
   content: "";
   position: absolute;
   inset: 6px;
   border-radius: inherit;
-  border: 1px dashed rgba(43, 108, 176, 0.22);
+  border: 1px dashed rgba(43,108,176,0.22);
 }
-
 .brand-logo-badge::after {
   content: "";
   position: absolute;
   inset: -42%;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.46) 50%, transparent 65%);
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.46) 50%, transparent 65%);
   transform: translateX(-55%) rotate(10deg);
   animation: logo-shine 4.5s ease-in-out infinite;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — Bootstrap 5 style
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .bs5-sidebar {
   gap: 0.55rem;
@@ -242,7 +448,6 @@ a {
     background-color 180ms ease,
     box-shadow 180ms ease;
 }
-
 .bs5-nav-link::before {
   content: "";
   position: absolute;
@@ -253,20 +458,21 @@ a {
   background: transparent;
   transition: background-color 180ms ease;
 }
-
 .bs5-nav-link:hover {
   transform: translateX(2px);
-  box-shadow: 0 8px 18px rgba(43, 108, 176, 0.1);
+  box-shadow: 0 8px 18px rgba(43,108,176,0.1);
+}
+.bs5-nav-link.active::before {
+  background: rgba(43,108,176,0.55);
 }
 
-.bs5-nav-link.active::before {
-  background: rgba(43, 108, 176, 0.55);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .scroll-reveal {
   animation: reveal-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
-
 .app-content-shell > * {
   animation: reveal-up 650ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -280,31 +486,110 @@ a {
 }
 
 @keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes logo-shine {
-  0%,
-  60%,
-  100% {
-    transform: translateX(-55%) rotate(10deg);
-  }
-  75% {
-    transform: translateX(55%) rotate(10deg);
-  }
+  0%, 60%, 100% { transform: translateX(-55%) rotate(10deg); }
+  75%            { transform: translateX(55%) rotate(10deg); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .brand-logo-badge::after,
-  .scroll-reveal,
-  .app-content-shell > * {
-    animation: none;
-  }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in   { animation: fade-in 220ms ease both; }
+.animate-slide-up  { animation: slide-up-fade 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLES — responsive Bootstrap 5 style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Wrapper para overflow horizontal con indicador de scroll */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.table-responsive-wrapper::-webkit-scrollbar { height: 4px; }
+.table-responsive-wrapper::-webkit-scrollbar-track { background: var(--secondary); }
+.table-responsive-wrapper::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 99px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background-color: var(--border-soft); border-radius: 99px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted); }
+.sidebar-scroll { scrollbar-width: thin; scrollbar-color: var(--border-soft) transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM FIELD ESTADOS — validación visual
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Estado de error en inputs */
+.field-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
+
+/* Mensaje de error de campo */
+.field-error-msg {
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOOLTIP ACCESIBLE (Bootstrap 5 compatible)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 100;
+}
+[data-tooltip]:hover::after,
+[data-tooltip]:focus::after {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRINT — accesibilidad para impresión
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .surface-card { box-shadow: none; border: 1px solid #ccc; }
+  a::after { content: " (" attr(href) ")"; font-size: 0.8em; }
 }

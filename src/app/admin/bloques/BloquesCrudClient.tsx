@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import Icon from "@/components/Icon";
+import AdminFormModal from "@/app/admin/_components/AdminFormModal";
 import {
   createBloque,
   updateBloque,
@@ -34,16 +36,20 @@ const areaClass =
 type ModalMode = "create" | "edit" | "plantas" | null;
 
 export default function BloquesCrudClient({ bloques }: { bloques: Bloque[] }) {
-  const [modalMode, setModalMode] = useState<ModalMode>(null);
-  const [selected, setSelected]   = useState<Bloque | null>(null);
-  const [plantaMode, setPlantaMode] = useState<"create" | "edit" | null>(null);
+  const [modalMode, setModalMode]       = useState<ModalMode>(null);
+  const [selected, setSelected]         = useState<Bloque | null>(null);
+  const [plantaMode, setPlantaMode]     = useState<"create" | "edit" | null>(null);
   const [selectedPlanta, setSelectedPlanta] = useState<Planta | null>(null);
-  const [pending, setPending] = useState(false);
+  const [pending, setPending]           = useState(false);
 
   function openCreate() { setSelected(null); setModalMode("create"); }
   function openEdit(b: Bloque) { setSelected(b); setModalMode("edit"); }
-  function openPlantas(b: Bloque) { setSelected(b); setModalMode("plantas"); setPlantaMode(null); setSelectedPlanta(null); }
-  function closeModal() { setModalMode(null); setSelected(null); setPlantaMode(null); setSelectedPlanta(null); }
+  function openPlantas(b: Bloque) {
+    setSelected(b); setModalMode("plantas"); setPlantaMode(null); setSelectedPlanta(null);
+  }
+  function closeModal() {
+    setModalMode(null); setSelected(null); setPlantaMode(null); setSelectedPlanta(null);
+  }
 
   async function handleBloqueSubmit(formData: FormData) {
     setPending(true);
@@ -87,8 +93,8 @@ export default function BloquesCrudClient({ bloques }: { bloques: Bloque[] }) {
         <div className="grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center sm:p-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Bloque de acciones</p>
-            <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">Gestion del CRUD</h2>
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">Crea, edita, activa/desactiva y elimina bloques. Gestiona sus plantas desde el boton de planos.</p>
+            <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">Gestión del CRUD</h2>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">Crea, edita, activa/desactiva y elimina bloques. Gestiona sus plantas desde el botón de planos.</p>
           </div>
           <button
             type="button"
@@ -173,80 +179,78 @@ export default function BloquesCrudClient({ bloques }: { bloques: Bloque[] }) {
       </section>
 
       {/* ── Modal crear / editar bloque ──────────────────────────────────── */}
-      {(modalMode === "create" || modalMode === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--text)]/45 px-4 py-6 backdrop-blur-sm">
-          <section
-            role="dialog" aria-modal="true"
-            className="w-full max-w-2xl overflow-hidden rounded-[20px] border border-[var(--border-soft)] bg-white shadow-[0_28px_90px_rgba(15,23,42,0.24)]"
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-[var(--divider)] bg-[var(--primary-light)]/60 px-6 py-5">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0] to-[#3B82F6] text-white shadow-[0_10px_24px_rgba(43,108,176,0.3)]">
-                  <Icon name={modalMode === "create" ? "plus" : "edit"} className="h-5 w-5" />
+      <AdminFormModal
+        open={modalMode === "create" || modalMode === "edit"}
+        onClose={closeModal}
+        title={modalMode === "create" ? "Crear bloque" : `Editar: ${selected?.nombre}`}
+        subtitle={modalMode === "create" ? "Nuevo registro" : "Editar registro"}
+        iconName={modalMode === "create" ? "plus" : "edit"}
+        size="md"
+        pending={pending}
+        formAction={handleBloqueSubmit}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="space-y-1.5 sm:col-span-2">
+            <span className="text-sm font-semibold text-[var(--text)]">Nombre <span className="text-[var(--danger)]">*</span></span>
+            <input name="nombre" required defaultValue={selected?.nombre ?? ""} placeholder="Bloque A" className={fieldClass} />
+          </label>
+          {modalMode === "create" && (
+            <label className="space-y-1.5">
+              <span className="text-sm font-semibold text-[var(--text)]">Slug / ID (URL)</span>
+              <input name="slug" defaultValue="" placeholder="a (auto si vacío)" className={fieldClass} />
+              <p className="text-xs text-[var(--text-muted)]">Se genera automáticamente si se deja vacío.</p>
+            </label>
+          )}
+          <label className={`space-y-1.5 ${modalMode === "create" ? "" : "sm:col-span-2"}`}>
+            <span className="text-sm font-semibold text-[var(--text)]">Orden de visualización</span>
+            <input type="number" name="orden" min={0} defaultValue={selected?.orden ?? 0} className={fieldClass} />
+          </label>
+          <label className="space-y-1.5 sm:col-span-2">
+            <span className="text-sm font-semibold text-[var(--text)]">Resumen corto <span className="text-[var(--danger)]">*</span></span>
+            <input name="resumen" required defaultValue={selected?.resumen ?? ""} placeholder="Una línea descriptiva" className={fieldClass} />
+          </label>
+          <label className="space-y-1.5 sm:col-span-2">
+            <span className="text-sm font-semibold text-[var(--text)]">Descripción completa <span className="text-[var(--danger)]">*</span></span>
+            <textarea name="descripcion" required rows={4} defaultValue={selected?.descripcion ?? ""} placeholder="Descripción detallada del bloque..." className={areaClass} />
+          </label>
+
+          {/* Sección de imágenes */}
+          <div className="sm:col-span-2 border-t border-[var(--divider)] pt-4">
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-[var(--secondary)] p-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary-light)]">
+                  <Icon name="file" className="h-4 w-4 text-[var(--primary)]" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-                    {modalMode === "create" ? "Nuevo registro" : "Editar registro"}
-                  </p>
-                  <h3 className="mt-0.5 text-xl font-semibold text-[var(--text)]">
-                    {modalMode === "create" ? "Crear bloque" : `Editar ${selected?.nombre}`}
-                  </h3>
+                  <p className="text-sm font-semibold text-[var(--text)]">Imágenes del registro</p>
+                  {selected ? (
+                    <p className="text-xs text-[var(--text-muted)]">Planos, fotos y referencias del bloque.</p>
+                  ) : (
+                    <p className="text-xs text-amber-600">Guarda primero el registro para poder agregar imágenes.</p>
+                  )}
                 </div>
               </div>
-              <button type="button" onClick={closeModal}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-soft)] bg-white text-[var(--text-secondary)] transition hover:bg-[var(--secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                <Icon name="close" className="h-4 w-4" />
-              </button>
+              {selected && (
+                <Link
+                  href={`/admin/bloques/${selected.id}/imagenes`}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--primary)]/30 bg-white px-3 text-xs font-semibold text-[var(--primary)] transition hover:bg-[var(--primary-light)]"
+                >
+                  <Icon name="file" className="h-3.5 w-3.5" />
+                  Administrar
+                </Link>
+              )}
             </div>
-
-            <form action={handleBloqueSubmit}>
-              <div className="grid gap-4 p-6 sm:grid-cols-2">
-                <label className="space-y-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Nombre</span>
-                  <input name="nombre" required defaultValue={selected?.nombre ?? ""} placeholder="Bloque A" className={fieldClass} />
-                </label>
-                {modalMode === "create" && (
-                  <label className="space-y-2">
-                    <span className="text-sm font-semibold text-[var(--text)]">Slug / ID (URL)</span>
-                    <input name="slug" defaultValue="" placeholder="a (se genera automáticamente)" className={fieldClass} />
-                  </label>
-                )}
-                <label className="space-y-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Resumen corto</span>
-                  <input name="resumen" required defaultValue={selected?.resumen ?? ""} placeholder="Una línea descriptiva" className={fieldClass} />
-                </label>
-                <label className="space-y-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Descripción completa</span>
-                  <textarea name="descripcion" required rows={4} defaultValue={selected?.descripcion ?? ""} placeholder="Descripción detallada del bloque..." className={areaClass} />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[var(--text)]">Orden de visualización</span>
-                  <input type="number" name="orden" min={0} defaultValue={selected?.orden ?? 0} className={fieldClass} />
-                </label>
-              </div>
-              <div className="flex flex-col gap-3 border-t border-[var(--divider)] bg-[var(--secondary)] px-6 py-4 sm:flex-row sm:justify-end">
-                <button type="button" onClick={closeModal}
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border-soft)] bg-white px-5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                  Cancelar
-                </button>
-                <button type="submit" disabled={pending}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2B6CB0] to-[#3B82F6] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(43,108,176,0.28)] transition hover:-translate-y-0.5 disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                  <Icon name="checkCircle" className="h-4 w-4" />
-                  {pending ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
-            </form>
-          </section>
+          </div>
         </div>
-      )}
+      </AdminFormModal>
 
       {/* ── Modal plantas ────────────────────────────────────────────────── */}
       {modalMode === "plantas" && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--text)]/45 px-4 py-6 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-neutral-950/50 backdrop-blur-sm sm:items-center sm:p-6">
           <section
             role="dialog" aria-modal="true"
-            className="flex w-full max-w-2xl flex-col overflow-hidden rounded-[20px] border border-[var(--border-soft)] bg-white shadow-[0_28px_90px_rgba(15,23,42,0.24)]"
-            style={{ maxHeight: "90vh" }}
+            className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-[var(--border-soft)] bg-white shadow-[0_28px_90px_rgba(15,23,42,0.28)] sm:rounded-2xl"
+            style={{ maxHeight: "calc(100vh - 48px)" }}
           >
             <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[var(--divider)] bg-[var(--primary-light)]/60 px-6 py-5">
               <div className="flex items-start gap-3">
@@ -273,9 +277,9 @@ export default function BloquesCrudClient({ bloques }: { bloques: Bloque[] }) {
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--secondary)] text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
                       <tr>
-                        <th className="px-5 py-3 font-semibold text-left">Nombre</th>
-                        <th className="px-5 py-3 font-semibold text-left">Nivel</th>
-                        <th className="px-5 py-3 font-semibold text-left">Imagen</th>
+                        <th className="px-5 py-3 text-left font-semibold">Nombre</th>
+                        <th className="px-5 py-3 text-left font-semibold">Nivel</th>
+                        <th className="px-5 py-3 text-left font-semibold">Imagen</th>
                         <th className="px-5 py-3 text-right font-semibold">Acciones</th>
                       </tr>
                     </thead>
@@ -285,7 +289,7 @@ export default function BloquesCrudClient({ bloques }: { bloques: Bloque[] }) {
                           <td className="px-5 py-3 font-medium text-[var(--text)]">{p.nombre}</td>
                           <td className="px-5 py-3 text-[var(--text-secondary)]">{p.nivel}</td>
                           <td className="px-5 py-3">
-                            <span className="font-mono text-xs text-[var(--text-muted)]">{p.imagenUrl}</span>
+                            <span className="font-mono text-xs text-[var(--text-muted)] line-clamp-1">{p.imagenUrl}</span>
                           </td>
                           <td className="px-5 py-3">
                             <div className="flex justify-end gap-2">
@@ -312,16 +316,16 @@ export default function BloquesCrudClient({ bloques }: { bloques: Bloque[] }) {
                   <h4 className="col-span-2 text-base font-semibold text-[var(--text)]">
                     {plantaMode === "create" ? "Nueva planta" : `Editar: ${selectedPlanta?.nombre}`}
                   </h4>
-                  <label className="space-y-2">
-                    <span className="text-sm font-semibold text-[var(--text)]">Nombre</span>
+                  <label className="space-y-1.5">
+                    <span className="text-sm font-semibold text-[var(--text)]">Nombre <span className="text-[var(--danger)]">*</span></span>
                     <input name="nombre" required defaultValue={selectedPlanta?.nombre ?? ""} placeholder="Planta Baja" className={fieldClass} />
                   </label>
-                  <label className="space-y-2">
+                  <label className="space-y-1.5">
                     <span className="text-sm font-semibold text-[var(--text)]">Nivel (orden)</span>
                     <input type="number" name="nivel" min={0} defaultValue={selectedPlanta?.nivel ?? 0} className={fieldClass} />
                   </label>
-                  <label className="space-y-2 sm:col-span-2">
-                    <span className="text-sm font-semibold text-[var(--text)]">URL de imagen / plano</span>
+                  <label className="space-y-1.5 sm:col-span-2">
+                    <span className="text-sm font-semibold text-[var(--text)]">URL de imagen / plano <span className="text-[var(--danger)]">*</span></span>
                     <input name="imagenUrl" required defaultValue={selectedPlanta?.imagenUrl ?? ""} placeholder="/planos/bloque-a-b-c-planta-baja.svg" className={fieldClass} />
                   </label>
                   <div className="col-span-2 flex gap-3">
