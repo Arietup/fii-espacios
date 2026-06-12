@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AdminModal from "@/app/admin/_components/AdminModal";
+import Icon from "@/components/Icon";
 import { prisma } from "@/lib/prisma";
 import { updateUser } from "../actions";
 
 export const metadata = {
   title: "Editar usuario | Espacios FII",
 };
+
+const fieldClass = "fi";
 
 export default async function EditarUsuarioPage({
   params,
@@ -19,75 +23,85 @@ export default async function EditarUsuarioPage({
   const updateUserWithId = updateUser.bind(null, usuario.id);
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-6">
-      <div>
-        <Link href="/admin/usuarios" className="text-sm text-[#003865] hover:underline">
-          ← Volver a usuarios
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-[#003865]">Editar usuario</h1>
-        <p className="mt-1 text-neutral-600">
-          Actualiza los datos de <strong>{usuario.username}</strong>. Deja la
-          contraseña en blanco si no quieres cambiarla.
+    <AdminModal
+      title="Editar usuario"
+      description={`Actualiza los datos de ${usuario.username}. Deja la contrasena en blanco si no quieres cambiarla.`}
+      backHref="/admin/usuarios"
+      backLabel="Usuarios"
+    >
+      <div className="mb-5">
+        <p className="badge-pill bg-[var(--primary-light)] text-[var(--primary)]">
+          <Icon name="shield" className="h-3.5 w-3.5" />
+          Administracion
         </p>
       </div>
 
-      <form action={updateUserWithId} className="flex flex-col gap-4 rounded-lg border border-neutral-200 p-6">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-neutral-700">Usuario</label>
-          <input
-            name="username"
-            defaultValue={usuario.username}
-            required
-            className="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-[#003865] focus:outline-none"
-          />
+      <form action={updateUserWithId} className="surface-card overflow-hidden">
+        <div className="flex items-center gap-3 border-b border-[var(--divider)] bg-[var(--primary-light)]/60 px-6 py-5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0] to-[#3B82F6] text-white shadow-[0_10px_24px_rgba(43,108,176,0.3)]">
+            <Icon name="edit" className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Editar registro</p>
+            <h2 className="mt-0.5 text-lg font-semibold text-[var(--text)]">Datos de la cuenta</h2>
+          </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-neutral-700">Nombre completo</label>
-          <input
-            name="name"
-            defaultValue={usuario.name}
-            required
-            className="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-[#003865] focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-neutral-700">
-            Nueva contraseña (opcional)
+
+        <div className="grid gap-4 p-6 sm:grid-cols-2">
+          <label className="space-y-2">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--text)]">
+              <Icon name="users" className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+              Usuario
+            </span>
+            <input name="username" defaultValue={usuario.username} required className={fieldClass} />
           </label>
-          <input
-            name="password"
-            type="password"
-            minLength={6}
-            placeholder="Dejar en blanco para no cambiarla"
-            className="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-[#003865] focus:outline-none"
-          />
+          <label className="space-y-2">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--text)]">
+              <Icon name="users" className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+              Nombre completo
+            </span>
+            <input name="name" defaultValue={usuario.name} required className={fieldClass} />
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--text)]">
+              <Icon name="lock" className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+              Nueva contrasena
+            </span>
+            <input
+              name="password"
+              type="password"
+              minLength={6}
+              placeholder="Dejar en blanco para no cambiarla"
+              className={fieldClass}
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--text)]">
+              <Icon name="shield" className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+              Rol
+            </span>
+            <select name="role" defaultValue={usuario.role} className="fi fi-select">
+              <option value="USER">Usuario</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </label>
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-neutral-700">Rol</label>
-          <select
-            name="role"
-            defaultValue={usuario.role}
-            className="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-[#003865] focus:outline-none"
-          >
-            <option value="USER">Usuario</option>
-            <option value="ADMIN">Administrador</option>
-          </select>
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            className="rounded-md bg-[#003865] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#00518f] transition-colors"
-          >
-            Guardar cambios
-          </button>
+        <div className="flex flex-col gap-3 border-t border-[var(--divider)] bg-[var(--secondary)] px-6 py-4 sm:flex-row sm:justify-end">
           <Link
             href="/admin/usuarios"
-            className="rounded-md border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border-soft)] bg-white px-5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
           >
             Cancelar
           </Link>
+          <button
+            type="submit"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2B6CB0] to-[#3B82F6] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(43,108,176,0.28)] transition hover:shadow-[0_16px_36px_rgba(43,108,176,0.34)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+          >
+            <Icon name="checkCircle" className="h-4 w-4" />
+            Guardar cambios
+          </button>
         </div>
       </form>
-    </div>
+    </AdminModal>
   );
 }

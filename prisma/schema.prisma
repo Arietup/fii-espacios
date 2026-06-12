@@ -1,15 +1,13 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum Role {
@@ -17,12 +15,280 @@ enum Role {
   USER
 }
 
+enum TipoImagen {
+  PLANO
+  REFERENCIAL
+  FOTO
+  CROQUIS
+  OTRO
+}
+
 model User {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String              @id @default(cuid())
+  username     String              @unique
   name         String
   passwordHash String
-  role         Role     @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         Role                @default(USER)
+  comentarios  EspacioComentario[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+// ─── Tipos de espacio ────────────────────────────────────────────────────────
+
+model Tipo {
+  id          String    @id
+  etiqueta    String
+  descripcion String?
+  color       String
+  accent      String
+  icono       String?
+  activo      Boolean   @default(true)
+  orden       Int       @default(0)
+  espacios    Espacio[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}
+
+// ─── Estado físico de un espacio ─────────────────────────────────────────────
+
+model EstadoFisico {
+  id          String    @id @default(cuid())
+  nombre      String    @unique
+  descripcion String?
+  color       String    @default("#64748B")
+  activo      Boolean   @default(true)
+  orden       Int       @default(0)
+  espacios    Espacio[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ─── Catálogo de usos ────────────────────────────────────────────────────────
+
+model UsoEspacio {
+  id          String       @id @default(cuid())
+  nombre      String       @unique
+  descripcion String?
+  activo      Boolean      @default(true)
+  orden       Int          @default(0)
+  espacios    EspacioUso[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// ─── Catálogo de equipamiento ─────────────────────────────────────────────────
+
+model Equipamiento {
+  id          String                @id @default(cuid())
+  nombre      String                @unique
+  descripcion String?
+  categoria   String?
+  activo      Boolean               @default(true)
+  espacios    EspacioEquipamiento[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+}
+
+// ─── Bloques ──────────────────────────────────────────────────────────────────
+
+model Bloque {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  codigo        String?
+  nombre        String
+  resumen       String
+  descripcion   String
+  ubicacion     String?
+  observaciones String?
+  activo        Boolean   @default(true)
+  orden         Int       @default(0)
+  plantas       Planta[]
+  espacios      Espacio[]
+  imagenes      BloqueImagen[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Imagen {
+  id          String     @id @default(cuid())
+  entidad     String
+  entidadId   String
+  tipo        TipoImagen
+  nombre      String?
+  mimeType    String
+  base64      String     @db.Text
+  descripcion String?
+  principal   Boolean    @default(false)
+  orden       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@ignore
+}
+
+// ─── Plantas ──────────────────────────────────────────────────────────────────
+
+model Planta {
+  id            String        @id @default(cuid())
+  nombre        String
+  codigo        String?
+  nivel         Int           @default(0)
+  descripcion   String?
+  imagenUrl     String
+  observaciones String?
+  activo        Boolean       @default(true)
+  orden         Int           @default(0)
+  bloqueId      String
+  bloque        Bloque        @relation(fields: [bloqueId], references: [id], onDelete: Cascade)
+  espacios      Espacio[]
+  planos        PlantaPlano[]
+  imagenes      PlantaImagen[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model PlantaPlano {
+  id          String   @id @default(cuid())
+  plantaId    String
+  url         String
+  nombre      String?
+  descripcion String?
+  orden       Int      @default(0)
+  principal   Boolean  @default(true)
+  planta      Planta   @relation(fields: [plantaId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Espacios ─────────────────────────────────────────────────────────────────
+
+model Espacio {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  codigo              String   @unique
+  nombre              String
+  descripcion         String
+  capacidad           Int?
+  cantidadPuestos     Int?
+  areaM2              Float?
+  largoCm             Int?
+  anchoCm             Int?
+  altoCm              Int?
+  accesoPublico       Boolean  @default(true)
+  observaciones       String?
+  ubicacionReferencia String?
+  activo              Boolean  @default(true)
+  tipoId              String
+  tipo                Tipo              @relation(fields: [tipoId], references: [id])
+  bloqueId            String
+  bloque              Bloque            @relation(fields: [bloqueId], references: [id])
+  plantaId            String
+  planta              Planta            @relation(fields: [plantaId], references: [id])
+  estadoFisicoId      String?
+  estadoFisico        EstadoFisico?     @relation(fields: [estadoFisicoId], references: [id])
+  usos                EspacioUso[]
+  equipamiento        EspacioEquipamiento[]
+  comentarios         EspacioComentario[]
+  imagenes            EspacioImagen[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model BloqueImagen {
+  id          String     @id @default(cuid())
+  bloqueId    String
+  bloque      Bloque     @relation(fields: [bloqueId], references: [id], onDelete: Cascade)
+  tipo        TipoImagen @default(FOTO)
+  nombre      String?
+  descripcion String?
+  mimeType    String
+  base64      String     @db.Text
+  principal   Boolean    @default(false)
+  orden       Int        @default(0)
+  activo      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([bloqueId])
+  @@index([bloqueId, tipo])
+}
+
+model PlantaImagen {
+  id          String     @id @default(cuid())
+  plantaId    String
+  planta      Planta     @relation(fields: [plantaId], references: [id], onDelete: Cascade)
+  tipo        TipoImagen @default(PLANO)
+  nombre      String?
+  descripcion String?
+  mimeType    String
+  base64      String     @db.Text
+  principal   Boolean    @default(false)
+  orden       Int        @default(0)
+  activo      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([plantaId])
+  @@index([plantaId, tipo])
+}
+
+// ─── Tablas de unión ──────────────────────────────────────────────────────────
+
+model EspacioUso {
+  espacioId String
+  usoId     String
+  espacio   Espacio    @relation(fields: [espacioId], references: [id], onDelete: Cascade)
+  uso       UsoEspacio @relation(fields: [usoId], references: [id], onDelete: Cascade)
+
+  @@id([espacioId, usoId])
+}
+
+model EspacioEquipamiento {
+  id             String       @id @default(cuid())
+  espacioId      String
+  equipamientoId String
+  cantidad       Int          @default(1)
+  estado         String?
+  observaciones  String?
+  espacio        Espacio      @relation(fields: [espacioId], references: [id], onDelete: Cascade)
+  equipamiento   Equipamiento @relation(fields: [equipamientoId], references: [id], onDelete: Cascade)
+
+  @@unique([espacioId, equipamientoId])
+}
+
+// ─── Comentarios internos ─────────────────────────────────────────────────────
+
+model EspacioComentario {
+  id                  String   @id @default(cuid())
+  espacioId           String
+  userId              String
+  comentario          String
+  tipoComentario      String?
+  visiblePublicamente Boolean  @default(false)
+  espacio             Espacio  @relation(fields: [espacioId], references: [id], onDelete: Cascade)
+  usuario             User     @relation(fields: [userId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ─── Imágenes de espacio ──────────────────────────────────────────────────────
+
+model EspacioImagen {
+  id          String     @id @default(cuid())
+  espacioId   String
+  espacio     Espacio    @relation(fields: [espacioId], references: [id], onDelete: Cascade)
+  tipo        TipoImagen @default(FOTO)
+  nombre      String?
+  descripcion String?
+  mimeType    String
+  base64      String     @db.Text
+  principal   Boolean    @default(false)
+  orden       Int        @default(0)
+  activo      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([espacioId])
+  @@index([espacioId, tipo])
 }

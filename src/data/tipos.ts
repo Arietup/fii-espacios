@@ -9,16 +9,16 @@ export type TipoEspacio =
   | "circulacion"
   | "servicio";
 
-export const TIPOS_INFO: Record<TipoEspacio, { etiqueta: string; color: string }> = {
-  aula: { etiqueta: "Aula", color: "bg-blue-100 text-blue-800" },
-  laboratorio: { etiqueta: "Laboratorio", color: "bg-emerald-100 text-emerald-800" },
-  taller: { etiqueta: "Taller", color: "bg-amber-100 text-amber-800" },
-  oficina: { etiqueta: "Oficina", color: "bg-violet-100 text-violet-800" },
-  auditorio: { etiqueta: "Auditorio / Gradas", color: "bg-rose-100 text-rose-800" },
-  bano: { etiqueta: "Baño", color: "bg-cyan-100 text-cyan-800" },
-  deposito: { etiqueta: "Depósito / Bodega", color: "bg-stone-200 text-stone-800" },
-  circulacion: { etiqueta: "Circulación / Escaleras", color: "bg-slate-200 text-slate-800" },
-  servicio: { etiqueta: "Servicios generales", color: "bg-orange-100 text-orange-800" },
+export const TIPOS_INFO: Record<TipoEspacio, { etiqueta: string; color: string; accent: string }> = {
+  aula: { etiqueta: "Aula", accent: "#8B5CF6", color: "bg-[#8B5CF6]/12 text-[#7C3AED]" },
+  laboratorio: { etiqueta: "Laboratorio", accent: "#10B981", color: "bg-[#10B981]/12 text-[#0D9488]" },
+  taller: { etiqueta: "Taller", accent: "#F59E0B", color: "bg-[#F59E0B]/15 text-[#B45309]" },
+  oficina: { etiqueta: "Oficina", accent: "#3B82F6", color: "bg-[#3B82F6]/12 text-[#1D4ED8]" },
+  auditorio: { etiqueta: "Auditorio / Gradas", accent: "#F97316", color: "bg-[#F97316]/14 text-[#C2410C]" },
+  bano: { etiqueta: "Baño", accent: "#0EA5E9", color: "bg-[#0EA5E9]/12 text-[#0369A1]" },
+  deposito: { etiqueta: "Depósito / Bodega", accent: "#64748B", color: "bg-[#64748B]/14 text-[#475569]" },
+  circulacion: { etiqueta: "Circulación / Escaleras", accent: "#64748B", color: "bg-[#64748B]/10 text-[#475569]" },
+  servicio: { etiqueta: "Servicios generales", accent: "#EC4899", color: "bg-[#EC4899]/12 text-[#BE185D]" },
 };
 
 export interface Espacio {
@@ -33,6 +33,7 @@ export interface Espacio {
 }
 
 export interface PlantaBloque {
+  id?: string;
   nombre: string;
   imagen: string;
 }

@@ -1,8 +1,93 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   VARIABLES DE DISEÑO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f8fc;
+  --foreground: #1e293b;
+  --app-bg: #f4f8fc;
+
+  /* Brand / primary */
+  --brand: #2b6cb0;
+  --brand-hover: #245c99;
+  --primary: #2b6cb0;
+  --primary-hover: #245c99;
+  --primary-light: #edf6ff;
+  --primary-soft: #dceeff;
+
+  /* Neutrals & surfaces */
+  --surface: #ffffff;
+  --secondary: #f7fafc;
+  --border-soft: #e2e8f0;
+  --divider: #edf2f7;
+
+  /* Text — relación de contraste WCAG AA mínimo 4.5:1 sobre fondo blanco */
+  --text: #1e293b;          /* 13.9:1 */
+  --text-secondary: #475569; /* 7.0:1 — mejorado desde #64748b */
+  --text-muted: #64748b;    /* 4.6:1 — mínimo AA */
+
+  /* Accents */
+  --success: #16a34a;       /* verde más oscuro para mejor contraste */
+  --success-light: #dcfce7;
+  --warning: #d97706;       /* ámbar más oscuro */
+  --warning-light: #fef3c7;
+  --danger: #dc2626;        /* rojo más oscuro */
+  --danger-light: #fee2e2;
+  --info: #0369a1;          /* azul más oscuro */
+  --info-light: #e0f2fe;
+
+  /* Muted */
+  --muted: #64748b;
+
+  /* Space-type accents */
+  --type-aula: #7c3aed;
+  --type-laboratorio: #059669;
+  --type-oficina: #2563eb;
+  --type-auditorio: #ea580c;
+  --type-bodega: #475569;
+  --type-sala: #db2777;
+  --type-taller: #d97706;
+
+  --shadow-soft: 0 1px 3px rgba(30, 41, 59, 0.06), 0 8px 28px rgba(30, 41, 59, 0.08);
+  --shadow-lift: 0 20px 48px rgba(43, 108, 176, 0.16);
+  --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+
+  /* Focus ring — visible para teclado */
+  --focus-ring: 0 0 0 3px rgba(43, 108, 176, 0.45);
+  --focus-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.45);
+
+  /* Bootstrap 5 compat grid variables */
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), "Segoe UI", Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 @theme inline {
@@ -12,8 +97,680 @@
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESIBILIDAD — WCAG 2.1 AA
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Skip-to-content link (visible al recibir foco con teclado) */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.6rem 1.25rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 0 0 0.75rem 0.75rem;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(43,108,176,0.35);
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* 2. Screen-reader only (Bootstrap 5 & WCAG) */
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Versión que reaparece al recibir foco */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* 3. Focus visible — solo para navegación de teclado (WCAG 2.4.11) */
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Eliminar outline del mouse (no-keyboard) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 4. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 5. Alto contraste (Windows High Contrast / prefers-contrast) */
+@media (prefers-contrast: high) {
+  :root {
+    --border-soft: #000;
+    --divider: #333;
+    --text-muted: #1e293b;
+    --text-secondary: #1e293b;
+    --primary-light: #fff3cd;
+    --secondary: #f0f0f0;
+  }
+
+  .surface-card,
+  .kpi-card {
+    border: 2px solid #000 !important;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* 6. Live region para lectores de pantalla */
+.sr-live-polite {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SURFACES & CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.surface-card-hover {
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease, border-color 220ms ease;
+}
+.surface-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lift);
+}
+
+.glass-panel {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRAND GRADIENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.brand-gradient {
+  background: linear-gradient(135deg, #1e4e8c 0%, #2b6cb0 45%, #3b82f6 100%);
+}
+
+.brand-gradient-soft {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-soft) 100%);
+}
+
+.login-gradient {
+  background: linear-gradient(160deg, #0a2f52 0%, #0f4a82 48%, #1b6294 100%);
+}
+
+.login-pattern {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGES & PILLS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KPI CARDS — más llamativas con gradiente y brillo
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary-soft);
+  box-shadow: var(--shadow-lift);
+}
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(140deg, rgba(255,255,255,0.55) 0%, transparent 50%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKELETON LOADING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--divider);
+  border-radius: 0.6rem;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+  animation: skeleton-sweep 1.6s infinite;
+}
+@keyframes skeleton-sweep {
+  100% { transform: translateX(100%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOVER SCALE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hover-scale {
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hover-scale:hover {
+  transform: scale(1.015);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTONES ACCESIBLES — btn-primary Bootstrap-compatible
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1.25rem;
+  background: linear-gradient(135deg, #2b6cb0, #3b82f6);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(43,108,176,0.25);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(43,108,176,0.32);
+  background: linear-gradient(135deg, #245c99, #2b6cb0);
+  color: #fff;
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(43,108,176,0.2);
+}
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-primary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRAND LOGO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+button, a, input, select, textarea {
+  outline-color: var(--brand);
+}
+
+a { text-decoration: none; }
+
+.brand-logo-badge {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.85);
+  background: radial-gradient(circle at 30% 20%, #ffffff 0 24%, #edf6ff 58%, #dceeff 100%);
+  box-shadow:
+    0 14px 32px rgba(43,108,176,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -10px 22px rgba(43,108,176,0.08);
+  isolation: isolate;
+}
+.brand-logo-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+}
+.brand-logo-badge::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  border: 1px dashed rgba(43,108,176,0.22);
+}
+.brand-logo-badge::after {
+  content: "";
+  position: absolute;
+  inset: -42%;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.46) 50%, transparent 65%);
+  transform: translateX(-55%) rotate(10deg);
+  animation: logo-shine 4.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — Bootstrap 5 style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bs5-sidebar {
+  gap: 0.55rem;
+}
+
+.bs5-nav-link {
+  position: relative;
+  min-height: 3.35rem;
+  border-radius: 0.75rem;
+  padding: 0.78rem 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.bs5-nav-link::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.7rem;
+  left: 0.35rem;
+  width: 0.2rem;
+  border-radius: 999px;
+  background: transparent;
+  transition: background-color 180ms ease;
+}
+.bs5-nav-link:hover {
+  transform: translateX(2px);
+  box-shadow: 0 8px 18px rgba(43,108,176,0.1);
+}
+.bs5-nav-link.active::before {
+  background: rgba(43,108,176,0.55);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.scroll-reveal {
+  animation: reveal-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.app-content-shell > * {
+  animation: reveal-up 650ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@supports (animation-timeline: view()) {
+  .scroll-reveal,
+  .app-content-shell > * {
+    animation-timeline: view();
+    animation-range: entry 0% cover 28%;
+  }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes logo-shine {
+  0%, 60%, 100% { transform: translateX(-55%) rotate(10deg); }
+  75%            { transform: translateX(55%) rotate(10deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in   { animation: fade-in 220ms ease both; }
+.animate-slide-up  { animation: slide-up-fade 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLES — responsive Bootstrap 5 style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Wrapper para overflow horizontal con indicador de scroll */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.table-responsive-wrapper::-webkit-scrollbar { height: 4px; }
+.table-responsive-wrapper::-webkit-scrollbar-track { background: var(--secondary); }
+.table-responsive-wrapper::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 99px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background-color: var(--border-soft); border-radius: 99px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted); }
+.sidebar-scroll { scrollbar-width: thin; scrollbar-color: var(--border-soft) transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM FIELD ESTADOS — validación visual
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Estado de error en inputs */
+.field-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
+
+/* Mensaje de error de campo */
+.field-error-msg {
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — CAMPOS DE FORMULARIO
+   .fi = input/select base  ·  .fi-select = select con flecha personalizada
+   .fi-area = textarea      ·  .fi-file   = file input
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Campo base (input, select) ─────────────────────────────────────────── */
+.fi {
+  display: block;
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--text);
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-soft);
+  border-radius: 0.75rem;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+}
+
+.fi::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.fi:hover:not(:focus):not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+.fi:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.14);
+}
+
+.fi:disabled,
+.fi[disabled] {
+  background-color: var(--secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* ── Autofill: elimina fondo amarillo/azul de Chrome, Brave, Edge, Safari ── */
+.fi:-webkit-autofill,
+.fi:-webkit-autofill:hover,
+.fi:-webkit-autofill:focus,
+.fi:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text) !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: var(--text);
+}
+
+/* ── Select con flecha personalizada ────────────────────────────────────── */
+.fi-select {
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.875rem;
+  cursor: pointer;
+}
+
+.fi-select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%232b6cb0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* ── Textarea ────────────────────────────────────────────────────────────── */
+.fi-area {
+  display: block;
+  width: 100%;
+  min-height: 4rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.55;
+  color: var(--text);
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-soft);
+  border-radius: 0.75rem;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.fi-area::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.fi-area:hover:not(:focus):not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+.fi-area:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.14);
+}
+
+.fi-area:disabled {
+  background-color: var(--secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* ── File input ──────────────────────────────────────────────────────────── */
+.fi-file {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--text);
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-soft);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 150ms ease;
+}
+
+.fi-file:hover:not(:focus) {
+  border-color: var(--text-muted);
+}
+
+.fi-file:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.14);
+}
+
+.fi-file::file-selector-button {
+  height: 1.875rem;
+  padding: 0 0.875rem;
+  margin-right: 0.75rem;
+  border: none;
+  border-radius: 0.45rem;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+  -webkit-appearance: none;
+}
+
+.fi-file::file-selector-button:hover {
+  background-color: var(--primary-soft);
+}
+
+/* ── Fix autofill para floating labels (LoginForm — clase peer de Tailwind) */
+/* El autofill no dispara :not(:placeholder-shown), dejando el label encima
+   del valor autocompletado. Esta regla mueve el label arriba en ese caso.  */
+input.peer:-webkit-autofill ~ label,
+input.peer:autofill ~ label {
+  top: 8px !important;
+  transform: translateY(0) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #0A4A82 !important;
+}
+
+/* ── Autofill para inputs con clase peer (LoginForm) ────────────────────── */
+input.peer:-webkit-autofill,
+input.peer:-webkit-autofill:hover,
+input.peer:-webkit-autofill:focus {
+  -webkit-text-fill-color: #243447 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: #243447;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOOLTIP ACCESIBLE (Bootstrap 5 compatible)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 100;
+}
+[data-tooltip]:hover::after,
+[data-tooltip]:focus::after {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRINT — accesibilidad para impresión
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .surface-card { box-shadow: none; border: 1px solid #ccc; }
+  a::after { content: " (" attr(href) ")"; font-size: 0.8em; }
 }
